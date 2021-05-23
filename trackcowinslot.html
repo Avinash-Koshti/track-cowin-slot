@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Find Where Slot Available</h2>
+Pincode : <input type="text" id="txtpincode" placeholder="Enter pincode"/><br/><br/>
+    Date : <input type="date" id="txtdate" placeholder="Enter date"/><br/><br/>
+	<button type="button" onclick="FindSlot()">Find</button>
+	<button type="button" onclick="Reset()">Reset</button><br/><br/>
+<div id="demo">
+	
+</div>
+
+<script>
+function Reset(){
+ document.getElementById("demo").innerHTML = '';   
+ document.getElementById("txtpincode").value=""; 
+document.getElementById("txtdate").value="";
+}
+
+function reformatDate(dateStr)
+{
+  dArr = dateStr.split("-");  // ex input "2010-01-18"
+  return dArr[2]+ "-" +dArr[1]+ "-" +dArr[0].substring(2); //ex out: "18/01/10"
+}
+
+function FindSlot() {
+
+let date = reformatDate(document.getElementById("txtdate").value);
+let pincode = document.getElementById("txtpincode").value;
+let html="";
+
+ 	var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=${pincode}&date=${date}`, false );
+    xmlHttp.send( null );
+    if(JSON.parse(xmlHttp.responseText).centers.length > 0)
+        {
+        var audio = new Audio('https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_700KB.mp3');
+audio.play();
+        	JSON.parse(xmlHttp.responseText).centers.forEach(center=>
+            {
+	    		if(center.pincode == pincode)
+                {
+                	console.log(center)
+               
+                	html = html + "Name: "+center.name+"</br>";
+                	html = html + "Address: "+center.address+"</br>";
+                	html = html + "Pincode: "+center.pincode+"</br>";
+                	html = html + "Time: "+center.from+"-"+center.to+"</br>";
+                	html = html + "Fee: "+center.fee_type+"</br>";
+                	center.sessions.forEach(session=>{
+                		console.log(session)
+                        html = html + "Min Age Limit: "+session.min_age_limit+"</br>";
+                        html = html + "Dose 1 available: "+session.available_capacity_dose1+"</br>";
+                        html = html + "Dose 2 available: "+session.available_capacity_dose2+"</br>";
+                    })
+                	html = html +"</br>------------------------------------------------------------------------------------------------------</br>"                	
+    			}
+    		})
+            document.getElementById("demo").innerHTML = html;
+        }
+        else
+        {
+    		FindSlot();
+    	}       
+}
+</script>
+
+</body>
+</html>
+
